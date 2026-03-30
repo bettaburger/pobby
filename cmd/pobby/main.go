@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/bettaburger/pobby/internal/command"
 )
 
 func main() {
-	fmt.Print("hello pobby\n")
+	command.Execute()
 }
