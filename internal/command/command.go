@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// descriptors
+// descriptor
 var rootCmd = &cobra.Command {
 	Use: "pobby",
 	Short: "Pobby is a CLI tool for ports.",
