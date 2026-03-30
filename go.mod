@@ -1,4 +1,4 @@
-module pobby
+module github.com/bettaburger/pobby
 
 go 1.24.0
 
