@@ -51,6 +51,7 @@ var selectStyle =
 	Background(lipgloss.Color("#282b30")).
 	Bold(true)
 
+
 func newModel(rows []table.Row) model {
 	columns := []table.Column{
 		{Title: "COMMAND", Width: 15},
@@ -58,26 +59,25 @@ func newModel(rows []table.Row) model {
 		{Title: "USER", Width: 15},
 		{Title: "PORT", Width: 25},
 	}
-
+	// the table image
 	t := table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
 	)
-
 	t.SetWidth(80)  
 	t.SetHeight(15)
 
 	s := table.DefaultStyles()
-
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(lipgloss.Color("240")).
 		BorderBottom(true).
 		Bold(true)
-
 	s.Selected = selectStyle
+
 	t.SetStyles(s)
+
 	// Textarea for search bar
 	search := textarea.New()
 	search.Placeholder = "Search port"
