@@ -2,14 +2,7 @@
 
 Pobby is a CLI program that displays and helps manage ports. 
 
-## Commmands
-
-Show all listening ports
+### Starting up the tool
 ```pobby list```
 
-Show a specific port
-```pobby status <port_number>```
-
-Kill port
-```pobby kill <port_number>```
 
