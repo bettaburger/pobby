@@ -133,7 +133,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 
 func (m model) View() tea.View {
-    // Get the table view directly — do NOT wrap table.View() itself in lipgloss
     tableView := m.table.View()
 	searchView := searchStyle.Render("Search: " + m.searchBar.View())
 
