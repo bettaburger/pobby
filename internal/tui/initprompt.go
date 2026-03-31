@@ -93,8 +93,6 @@ func newModel(rows []table.Row) model {
 	}
 }
 
-
-// --- Update ---
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
@@ -141,7 +139,7 @@ func (m model) View() tea.View {
         "%s\n\n%s\n\n%s\n\n%s",
         titleStyle.Render("Ports in listen..."),
 		searchView,
-        tableView, // leave untouched
+        tableView, 
         footStyle.Render("up/down: navigate | q: quit | enter: more info"),
     )
     var v tea.View
