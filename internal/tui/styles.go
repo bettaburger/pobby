@@ -4,7 +4,6 @@ import (
 	"charm.land/lipgloss/v2"
 )
 
-
 // title style
 var titleStyle = 
 	lipgloss.NewStyle().
