@@ -4,6 +4,15 @@ import (
 	"charm.land/lipgloss/v2"
 )
 
+// table styling 
+var (
+	baseStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.NormalBorder()).
+	BorderForeground(lipgloss.Color("#424549")).
+	Padding(0, 1).
+	Margin(1, 2)
+)
+
 // title style
 var titleStyle = 
 	lipgloss.NewStyle().
