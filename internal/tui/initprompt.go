@@ -24,15 +24,6 @@ func (m model) Init() tea.Cmd {
 	return textarea.Blink  
 }
 
-// table styling 
-var (
-	baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("#424549")).
-	Padding(0, 1).
-	Margin(1, 2)
-)
-
 func newModel(rows []table.Row) model {
 	columns := []table.Column{
 		{Title: "COMMAND", Width: 15},
@@ -46,7 +37,7 @@ func newModel(rows []table.Row) model {
 		table.WithRows(rows),
 		table.WithFocused(true),
 	)
-	t.SetWidth(80)  
+	t.SetWidth(70)  
 	t.SetHeight(15)
 
 	s := table.DefaultStyles()
@@ -65,11 +56,12 @@ func newModel(rows []table.Row) model {
 	search.SetWidth(50)
 	search.SetHeight(0)
 	search.CharLimit = 50
-	search.ShowLineNumbers = false 
+	search.ShowLineNumbers = false
+	search.Focus()
 
 	// Text area for delete bar
 	delete := textarea.New()
-	delete.Placeholder = "Delete port or pid"
+	delete.Placeholder = "Kill port or pid"
 	delete.SetWidth(50)
 	delete.SetHeight(0)
 	delete.CharLimit = 50
@@ -90,15 +82,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {	// where "input" goes msg.String()
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		
+		// reseting the table state after pressing enter with no search 
+		case "enter":
+			query := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
+			var filtered []table.Row
+			if query == "" {
+				filtered = m.rows
+			} else {
+				for _, r := range m.rows {
+					portCol := strings.ToLower(r[3])
+					commandName := strings.ToLower(r[0])
+					if strings.Contains(portCol, query) || strings.Contains(commandName, query) {
+						filtered = append(filtered, r)
+					}
+				}
+			}
+			m.table.SetRows(filtered)
+			return m, nil
 		}
+
 	case tea.MouseReleaseMsg:
 		if msg.Button != tea.MouseLeft {
 			return m, nil
 		}
+		// zones
 		switch {
 		case zone.Get("search").InBounds(msg):
 			m.searchBar.Focus()
 			m.deleteBar.Blur()
+			
 
 		case zone.Get("delete").InBounds(msg):
 			m.deleteBar.Focus()
@@ -107,14 +120,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	
-	// Update search bar
+	// Update search bar and delete bar
 	var cmd tea.Cmd
-	m.searchBar, cmd = m.searchBar.Update(msg)
-	cmds = append(cmds, cmd)
-
-	// update del bar
-	m.deleteBar, cmd = m.deleteBar.Update(msg)
-	cmds = append(cmds, cmd)
+	if m.searchBar.Focused() {
+		m.searchBar, cmd = m.searchBar.Update(msg)
+		cmds = append(cmds, cmd)
+	} else if m.deleteBar.Focused() {
+		m.deleteBar, cmd = m.deleteBar.Update(msg)
+		cmds = append(cmds, cmd)
+	}
 
 	// handle filtered rows/items
 	filtered := []table.Row{}
@@ -134,7 +148,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// killing a port
 	// rmber that ports owned by root requires sudo access. 
 	// ...
-	
+
 	m.table.SetRows(filtered)
 	m.table, cmd = m.table.Update(msg)
 	cmds = append(cmds, cmd)
@@ -164,7 +178,8 @@ func (m model) View() tea.View {
         footStyle.Render("up/down: navigate | q: quit | enter: more info"),
     )
     var v tea.View
-	v.AltScreen = true
+	// bubblezone requires altscreen
+	v.AltScreen = true				// *** not sure if i will keep this 
 	v.MouseMode = tea.MouseModeCellMotion
     v.SetContent(zone.Scan(baseStyle.Render(renderTable)))
     return v
