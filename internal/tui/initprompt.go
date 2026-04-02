@@ -175,7 +175,8 @@ func (m model) View() tea.View {
 		searchView,
 		deleteView,
         tableView, 
-        footStyle.Render("up/down: navigate | q: quit | enter: more info"),
+        footStyle.Render(
+			"Controls:\nup/down: navigate | q: quit | enter: more info"),
     )
     var v tea.View
 	// bubblezone requires altscreen
