@@ -130,26 +130,45 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	}
 
-	// handle filtered rows/items
-	filtered := []table.Row{}
-	query := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
-	if query == "" { 	// either nothing in the search bar or port does not exist
-		filtered = m.rows
+	/*
+	updating the view rows by filtering the search*/
+	filteredRows := []table.Row{}
+	//var portNum int
+	querySearch := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
+	queryDel := strings.ToLower(strings.TrimSpace(m.deleteBar.Value()))
+	// brace check for empty search
+	if querySearch == "" {
+		filteredRows = m.rows
 	} else {
 		for _, r := range m.rows {
 			portCol := strings.ToLower(r[3])		// port num
 			commandName := strings.ToLower(r[0])	// process name
-			if strings.Contains(portCol, query) || strings.Contains(commandName, query){
-				filtered = append(filtered, r)
+			// if query == port number or query == cmd name
+			if strings.Contains(portCol, querySearch) || strings.Contains(commandName, querySearch){
+				filteredRows = append(filteredRows, r)
 			}
+		}
+		// port to be deeleted removal 
+		if queryDel != "" {
+			tmp := []table.Row{}
+			for _, r := range filteredRows {
+				portCol := strings.ToLower(r[3])
+				PID := r[1]
+				if !strings.Contains(portCol, queryDel) || !strings.Contains(PID, queryDel) {
+					tmp = append(tmp, r)
+				}
+			}
+			filteredRows = tmp
 		}
 	}
 
-	// killing a port
+	// killing a port, rmber to splice the full port number, ignore anything before :
 	// rmber that ports owned by root requires sudo access. 
 	// ...
+	// have the table render every few seconds
+	// display refresh interval number at the bottom right maybe?
 
-	m.table.SetRows(filtered)
+	m.table.SetRows(filteredRows)
 	m.table, cmd = m.table.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -167,16 +186,16 @@ func (m model) View() tea.View {
 	deleteView := 
 		zone.Mark("delete", delStyle.Render("Delete: "+m.deleteBar.View()),
 	)
-
+	
 	// render components for table
     renderTable := fmt.Sprintf(
-        "%s\n\n%s\n\n%s\n\n%s\n%s",
+        "%s\n\n%s\n\n%s\n\n%s\n\n%s",
         titleStyle.Render("Ports in listen..."),
 		searchView,
 		deleteView,
         tableView, 
         footStyle.Render(
-			"Controls:\nup/down: navigate | q: quit | enter: more info"),
+			"up/down: navigate | q: quit | enter: more info"),
     )
     var v tea.View
 	// bubblezone requires altscreen
