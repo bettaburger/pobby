@@ -22,18 +22,22 @@ var titleStyle =
 // search style
 var searchStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#507fcb")).
-	Bold(true)
+	Bold(true).
+	Faint(true)
 
 // delete style
 var delStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#cd3b3b")). 
-	Bold(true)
+	Bold(true).
+	Faint(true)
 
 // footer style
 var footStyle = 
 	lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#34383e"))
-
+	Foreground(lipgloss.Color("#34383e")).
+	Underline(true).
+	Faint(true)
+   
 // selection style
 var selectStyle = 
 	lipgloss.NewStyle().
