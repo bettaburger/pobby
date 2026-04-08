@@ -4,18 +4,17 @@ import (
 	"charm.land/lipgloss/v2"
 )
 
-// table styling 
+// table styling
 var (
 	baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("#424549")).
-	Padding(0, 1).
-	Margin(1, 2)
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("#424549")).
+		Padding(0, 1).
+		Margin(1, 2)
 )
 
 // title style
-var titleStyle = 
-	lipgloss.NewStyle().
+var titleStyle = lipgloss.NewStyle().
 	Bold(true).
 	Foreground(lipgloss.Color("#64ff71"))
 
@@ -27,19 +26,17 @@ var searchStyle = lipgloss.NewStyle().
 
 // delete style
 var delStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#cd3b3b")). 
+	Foreground(lipgloss.Color("#cd3b3b")).
 	Bold(true).
 	Faint(true)
 
 // footer style
-var footStyle = 
-	lipgloss.NewStyle().
+var footStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#34383e")).
 	Faint(true)
 
 // selection style
-var selectStyle = 
-	lipgloss.NewStyle().
+var selectStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#ffffff")).
 	Background(lipgloss.Color("#282b30")).
 	Bold(true)
