@@ -61,7 +61,7 @@ func newModel(rows []table.Row) model {
 
 	// Text area for delete bar
 	delete := textarea.New()
-	delete.Placeholder = "Kill port or pid"
+	delete.Placeholder = "Kill PID"
 	delete.SetWidth(50)
 	delete.SetHeight(0)
 	delete.CharLimit = 50
@@ -79,11 +79,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
-		switch msg.String() {	// where "input" goes msg.String()
+		switch msg.String() {	
 		case "q", "ctrl+c":
 			return m, tea.Quit
-		
-		// reseting the table state after pressing enter with no search 
+	
 		case "enter":
 			query := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
 			var filtered []table.Row
@@ -130,10 +129,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	}
 
-	/*
-	updating the view rows by filtering the search*/
 	filteredRows := []table.Row{}
-	//var portNum int
+
 	querySearch := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
 	queryDel := strings.ToLower(strings.TrimSpace(m.deleteBar.Value()))
 	// brace check for empty search
@@ -141,20 +138,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		filteredRows = m.rows
 	} else {
 		for _, r := range m.rows {
-			portCol := strings.ToLower(r[3])		// port num
-			commandName := strings.ToLower(r[0])	// process name
-			// if query == port number or query == cmd name
+			portCol := r[3]		
+			commandName := strings.ToLower(r[0])	
 			if strings.Contains(portCol, querySearch) || strings.Contains(commandName, querySearch){
 				filteredRows = append(filteredRows, r)
 			}
 		}
-		// port to be deeleted removal 
+		// port to be removed from list
 		if queryDel != "" {
 			tmp := []table.Row{}
 			for _, r := range filteredRows {
 				portCol := strings.ToLower(r[3])
 				PID := r[1]
-				if !strings.Contains(portCol, queryDel) || !strings.Contains(PID, queryDel) {
+				if !strings.Contains(portCol, queryDel) && !strings.Contains(PID, queryDel) {
 					tmp = append(tmp, r)
 				}
 			}
@@ -162,7 +158,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// killing a port, rmber to splice the full port number, ignore anything before :
+	// killing a port, rmber to splice the full port number, ignore anything before : 
 	// rmber that ports owned by root requires sudo access. 
 	// ...
 	// have the table render every few seconds
@@ -179,7 +175,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
     tableView := m.table.View()
 
-	// wrapping marked zones: searchbar and deletebar
 	searchView := 
 		zone.Mark("search", searchStyle.Render("Search: "+m.searchBar.View()),
 	)
@@ -198,8 +193,7 @@ func (m model) View() tea.View {
 			"up/down: navigate | q: quit | enter: more info"),
     )
     var v tea.View
-	// bubblezone requires altscreen
-	v.AltScreen = true				// *** not sure if i will keep this 
+	v.AltScreen = true				
 	v.MouseMode = tea.MouseModeCellMotion
     v.SetContent(zone.Scan(baseStyle.Render(renderTable)))
     return v

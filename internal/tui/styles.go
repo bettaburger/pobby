@@ -35,9 +35,8 @@ var delStyle = lipgloss.NewStyle().
 var footStyle = 
 	lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#34383e")).
-	Underline(true).
 	Faint(true)
-   
+
 // selection style
 var selectStyle = 
 	lipgloss.NewStyle().
