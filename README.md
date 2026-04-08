@@ -1,6 +1,6 @@
 ## Pobby
 
-[pobby](https://github.com/user-attachments/assets/e86a7716-785e-4523-816a-4ac394359375)
+https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTRhNmt6YWM5YzdrdmgwZHdsOWRmM3J4MWx0cG52ZWI0cXR6NnAyYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SjYmS3k7j3mDYJg1tm/giphy.gif
 
 Pobby is a CLI tool that displays and manage listening ports. 
 
