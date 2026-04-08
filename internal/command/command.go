@@ -1,17 +1,16 @@
 package command
 
-
 import (
 	"fmt"
-	"os"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // descriptor
-var rootCmd = &cobra.Command {
-	Use: "pobby",
+var rootCmd = &cobra.Command{
+	Use:   "pobby",
 	Short: "Pobby is a CLI tool for ports.",
-	Long: "Simple CLI tool to display and manage listening ports in your terminal",
+	Long:  "Simple CLI tool to display and manage listening ports in your terminal",
 }
 
 func Execute() {

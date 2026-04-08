@@ -2,26 +2,27 @@ package tui
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
+	//"log"
 
-	tea "charm.land/bubbletea/v2"
 	"charm.land/bubbles/v2/table"
 	"charm.land/bubbles/v2/textarea"
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
 	zone "github.com/lrstanley/bubblezone/v2"
-
 )
 
-type model struct { 
-	table 		table.Model
-	rows		[]table.Row
-	searchBar 	textarea.Model 
-	deleteBar 	textarea.Model
+type model struct {
+	table     table.Model
+	rows      []table.Row
+	searchBar textarea.Model
+	deleteBar textarea.Model
 }
 
-func (m model) Init() tea.Cmd { 
-	return textarea.Blink  
+func (m model) Init() tea.Cmd {
+	return textarea.Blink
 }
 
 func newModel(rows []table.Row) model {
@@ -37,7 +38,7 @@ func newModel(rows []table.Row) model {
 		table.WithRows(rows),
 		table.WithFocused(true),
 	)
-	t.SetWidth(70)  
+	t.SetWidth(70)
 	t.SetHeight(15)
 
 	s := table.DefaultStyles()
@@ -65,26 +66,42 @@ func newModel(rows []table.Row) model {
 	delete.SetWidth(50)
 	delete.SetHeight(0)
 	delete.CharLimit = 50
-	delete.ShowLineNumbers = false 
-	
+	delete.ShowLineNumbers = false
+
 	return model{
-		table:     	t,
-		searchBar:  search,
-		deleteBar: 	delete,
-		rows:      	rows,
+		table:     t,
+		searchBar: search,
+		deleteBar: delete,
+		rows:      rows,
 	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	filteredRows := []table.Row{}
+	query := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
+	querySearch := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
+	queryDel := strings.TrimSpace(m.deleteBar.Value())
+
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
-		switch msg.String() {	
+		switch msg.String() {
+
 		case "q", "ctrl+c":
 			return m, tea.Quit
-	
+
 		case "enter":
-			query := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
+			// port deletion render
+			if queryDel != "" {
+				err := killPID(queryDel)
+				if err != nil {
+					m.deleteBar.Placeholder = "Can not find PID"
+				}
+				m.deleteBar.SetValue("")
+				m.deleteBar.Placeholder = "Port has been killed"
+				m.rows = refreshRows()
+				return m, nil
+			}
 			var filtered []table.Row
 			if query == "" {
 				filtered = m.rows
@@ -110,15 +127,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case zone.Get("search").InBounds(msg):
 			m.searchBar.Focus()
 			m.deleteBar.Blur()
-			
 
 		case zone.Get("delete").InBounds(msg):
 			m.deleteBar.Focus()
 			m.searchBar.Blur()
-
 		}
 	}
-	
+
 	// Update search bar and delete bar
 	var cmd tea.Cmd
 	if m.searchBar.Focused() {
@@ -129,41 +144,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	}
 
-	filteredRows := []table.Row{}
-
-	querySearch := strings.ToLower(strings.TrimSpace(m.searchBar.Value()))
-	queryDel := strings.ToLower(strings.TrimSpace(m.deleteBar.Value()))
-	// brace check for empty search
 	if querySearch == "" {
 		filteredRows = m.rows
 	} else {
 		for _, r := range m.rows {
-			portCol := r[3]		
-			commandName := strings.ToLower(r[0])	
-			if strings.Contains(portCol, querySearch) || strings.Contains(commandName, querySearch){
+			portCol := r[3]
+			commandName := strings.ToLower(r[0])
+			if strings.Contains(portCol, querySearch) || strings.Contains(commandName, querySearch) {
 				filteredRows = append(filteredRows, r)
 			}
 		}
-		// port to be removed from list
-		if queryDel != "" {
-			tmp := []table.Row{}
-			for _, r := range filteredRows {
-				portCol := strings.ToLower(r[3])
-				PID := r[1]
-				if !strings.Contains(portCol, queryDel) && !strings.Contains(PID, queryDel) {
-					tmp = append(tmp, r)
-				}
-			}
-			filteredRows = tmp
-		}
 	}
-
-	// killing a port, rmber to splice the full port number, ignore anything before : 
-	// rmber that ports owned by root requires sudo access. 
-	// ...
-	// have the table render every few seconds
-	// display refresh interval number at the bottom right maybe?
-
 	m.table.SetRows(filteredRows)
 	m.table, cmd = m.table.Update(msg)
 	cmds = append(cmds, cmd)
@@ -171,37 +162,64 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-
 func (m model) View() tea.View {
-    tableView := m.table.View()
+	tableView := m.table.View()
 
-	searchView := 
-		zone.Mark("search", searchStyle.Render("Search: "+m.searchBar.View()),
-	)
-	deleteView := 
-		zone.Mark("delete", delStyle.Render("Delete: "+m.deleteBar.View()),
-	)
-	
-	// render components for table
-    renderTable := fmt.Sprintf(
-        "%s\n\n%s\n\n%s\n\n%s\n\n%s",
-        titleStyle.Render("Ports in listen..."),
+	searchView :=
+		zone.Mark("search", searchStyle.Render("Search: "+m.searchBar.View()))
+	deleteView :=
+		zone.Mark("delete", delStyle.Render("Delete: "+m.deleteBar.View()))
+
+		// render components for table
+	renderTable := fmt.Sprintf(
+		"%s\n\n%s\n\n%s\n\n%s\n\n%s",
+		titleStyle.Render("Ports in listen..."),
 		searchView,
 		deleteView,
-        tableView, 
-        footStyle.Render(
+		tableView,
+		footStyle.Render(
 			"up/down: navigate | q: quit | enter: more info"),
-    )
-    var v tea.View
-	v.AltScreen = true				
+	)
+	var v tea.View
+	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
-    v.SetContent(zone.Scan(baseStyle.Render(renderTable)))
-    return v
+	v.SetContent(zone.Scan(baseStyle.Render(renderTable)))
+	return v
+}
+
+func refreshRows() []table.Row {
+	cmd := exec.Command("lsof", "-i", "-P", "-n")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil
+	}
+	lines := strings.Split(string(out), "\n")
+	var rows []table.Row
+	for _, line := range lines {
+		if strings.Contains(line, "LISTEN") {
+			fields := strings.Fields(line)
+			if len(fields) < 9 {
+				continue
+			}
+			rows = append(rows, table.Row{
+				fields[0], // command
+				fields[1], // pid
+				fields[2], // user
+				fields[8], // port
+			})
+		}
+	}
+	return rows
+}
+
+// func to kill port
+func killPID(pidNumber string) error {
+	cmd := exec.Command("kill", pidNumber)
+	return cmd.Run()
 }
 
 func StartTable(rows []table.Row) error {
 	p := tea.NewProgram(newModel(rows))
-	_, err := p.Run() 
+	_, err := p.Run()
 	return err
 }
-
