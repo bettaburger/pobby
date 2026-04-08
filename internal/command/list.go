@@ -15,7 +15,7 @@ var list string
 // shows all listening ports
 // run task list
 var listCmd = &cobra.Command{
-	Use:   "pobby",
+	Use:   "list",
 	Short: "display listening ports",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// run command to list ports macos
@@ -53,5 +53,5 @@ var listCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(listCmd)
 
-	listCmd.Flags().StringVarP(&list, "pobby", "p", "POBBY", "list all listening ports")
+	listCmd.Flags().StringVarP(&list, "list", "l", "LIST", "display all listening ports")
 }
