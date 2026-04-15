@@ -14,10 +14,10 @@ tasks:
 
   pobby:
     cmds:
-      - go run ./cmd/pobby/main.go pobby
+      - go run ./cmd/pobby/main.go
   
-  pin: 
+  pobby: 
     cmds:
-      - go run ./cmd/pobby/main.go pin {{.ARGS}}
+      - go run ./cmd/pobby/main.go list
 
 
