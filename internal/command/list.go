@@ -20,6 +20,7 @@ var listCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// run command to list ports macos
 		output := exec.Command("lsof", "-i", "-P", "-n")
+		
 
 		out, err := output.Output()
 		if err != nil {
