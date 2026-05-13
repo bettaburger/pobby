@@ -12,7 +12,7 @@ var FilterCmd = &cobra.Command {
 	Use: "filter",
 	Short: "displays a filter for finding specific processes",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tui.Run()
+		tui.Dashboard()
 		return nil
 	},
 }

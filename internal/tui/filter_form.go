@@ -1,12 +1,11 @@
 package tui
 
-import (
+/*import (
 	"fmt"
 	"strconv"
 	"strings"
 
-	tea "charm.land/bubbletea/v2"
-	"charm.land/huh/v2"
+	"github.com/rivo/tview"
 )
 
 // temporary vars
@@ -20,16 +19,12 @@ var (
 	state string
 )
 
-type formModel struct {
-	form *huh.Form
-}
-
 // this filter form model describes the text form to filter the lsof call. 
 func initFormModel() formModel {
 	form := huh.NewForm(
-		huh.NewGroup (
-			huh.NewInput().Title("pid number").Prompt("?").Validate(isNumber).Value(&pid),
-			huh.NewInput().Title("port number").Prompt("?").Validate(isNumber).Value(&portNumber),
+		huh.NewGroup(
+			huh.NewInput().Title("pid number").Prompt(">").Validate(isNumber).Value(&pid),
+			huh.NewInput().Title("port number").Prompt(">").Validate(isNumber).Value(&portNumber),
 			huh.NewSelect[string]().Title("proto").Options(
 				huh.NewOption("tcp", "tcp"),
 				huh.NewOption("udp", "udp"),
@@ -38,16 +33,16 @@ func initFormModel() formModel {
 				huh.NewOption("unix", "unix"),
 				huh.NewOption("socket", "socket"),
 			).Value(&proto),
-			huh.NewInput().Title("process name").Prompt("?").Value(&connectionName),
-			huh.NewInput().Title("local address").Prompt("?").Validate(isEmpty).Value(&laddr),
-			huh.NewInput().Title("foreign address").Prompt("?").Validate(isEmpty).Value(&faddr),
+			huh.NewInput().Title("process name").Prompt(">").Value(&connectionName),
+			huh.NewInput().Title("local address").Prompt(">").Validate(isEmpty).Value(&laddr),
+			huh.NewInput().Title("foreign address").Prompt(">").Validate(isEmpty).Value(&faddr),
 			huh.NewSelect[string]().Title("state").Options(
 				huh.NewOption("listening", "listening"),
 				huh.NewOption("established", "established"),
 			).Value(&state),
 			huh.NewConfirm().Key("done").Title("Filter?").Affirmative("Yes").Negative("No"),
 		),
-	).WithWidth(50).WithShowHelp(false).WithShowErrors(false)
+	).WithTheme(huh.ThemeFunc(huh.ThemeBase)).WithShowHelp(true).WithShowErrors(true).WithHeight(10).WithWidth(80)
 	return formModel{form: form}
 }
 
@@ -102,4 +97,4 @@ func isEmpty(s string) error {
 		return nil
 	} 
 	return nil
-}
+}*/
