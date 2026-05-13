@@ -21,6 +21,7 @@ type model struct {
 	deleteBar textarea.Model
 }
 
+
 func (m model) Init() tea.Cmd {
 	return textarea.Blink
 }
@@ -223,3 +224,5 @@ func StartTable(rows []table.Row) error {
 	_, err := p.Run()
 	return err
 }
+
+
