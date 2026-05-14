@@ -1,100 +1,27 @@
 package tui
 
-/*import (
-	"fmt"
-	"strconv"
-	"strings"
-
+import (
 	"github.com/rivo/tview"
+	"github.com/gdamore/tcell/v2" 
 )
 
-// temporary vars
-var (
-	pid string
-	portNumber string
-	proto string 
-	connectionName string 
-	laddr string 
-	faddr string
-	state string
-)
+// this function describes filterform primitive
+func FilterForm() *tview.Form {
+	form := tview.NewForm().
+	AddInputField("pid number", "", 40, tview.InputFieldInteger, nil).
+	AddInputField("port number", "", 40, tview.InputFieldInteger, nil).
+	AddDropDown("proto", []string{"any","tcp", "udp", "icmp", "ip", "udplite", "icmpmsg"}, 0, nil). // available for gopsutil ip,icmp,icmpmsg,tcp,udp,udplite
+	AddInputField("local address", "", 40, nil, nil).
+	AddInputField("foreign address", "", 40, nil, nil).
+	AddDropDown("state", []string{"listening", "established"}, 0, nil).
+	AddButton("Filter", nil)
+	form.SetTitle(" Filter ").SetBorder(true).SetTitleAlign(tview.AlignLeft)
+	form.SetFieldBackgroundColor(tcell.NewRGBColor(35,39,42))
+	form.SetBackgroundColor(tcell.NewRGBColor(30,33,36)) 
+	form.SetLabelColor(tcell.NewRGBColor(153,170,181)) // labels
+	form.SetButtonBackgroundColor(tcell.NewRGBColor(153,170,181))// filter button
+	form.SetButtonActivatedStyle(tcell.StyleDefault.Background(tcell.NewRGBColor(116,132,142)))
+	form.SetBorder(true)
 
-// this filter form model describes the text form to filter the lsof call. 
-func initFormModel() formModel {
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewInput().Title("pid number").Prompt(">").Validate(isNumber).Value(&pid),
-			huh.NewInput().Title("port number").Prompt(">").Validate(isNumber).Value(&portNumber),
-			huh.NewSelect[string]().Title("proto").Options(
-				huh.NewOption("tcp", "tcp"),
-				huh.NewOption("udp", "udp"),
-				huh.NewOption("icmp", "icmp"),
-				huh.NewOption("ip", "ip"),
-				huh.NewOption("unix", "unix"),
-				huh.NewOption("socket", "socket"),
-			).Value(&proto),
-			huh.NewInput().Title("process name").Prompt(">").Value(&connectionName),
-			huh.NewInput().Title("local address").Prompt(">").Validate(isEmpty).Value(&laddr),
-			huh.NewInput().Title("foreign address").Prompt(">").Validate(isEmpty).Value(&faddr),
-			huh.NewSelect[string]().Title("state").Options(
-				huh.NewOption("listening", "listening"),
-				huh.NewOption("established", "established"),
-			).Value(&state),
-			huh.NewConfirm().Key("done").Title("Filter?").Affirmative("Yes").Negative("No"),
-		),
-	).WithTheme(huh.ThemeFunc(huh.ThemeBase)).WithShowHelp(true).WithShowErrors(true).WithHeight(10).WithWidth(80)
-	return formModel{form: form}
+	return form 
 }
-
-// init the form model
-func (m formModel) Init() tea.Cmd { return m.form.Init() }
-
-func (m formModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
-		}
-	}
-	var cmds []tea.Cmd
-	// process form
-	form, cmd := m.form.Update(msg)
-	if f, ok := form.(*huh.Form); ok {
-		m.form = f
-		cmds = append(cmds, cmd)
-	}
-	// check if form is completed
-	if m.form.State == huh.StateCompleted {
-		// run the process 
-		// for now just quit the form when it is done
-		//cmds = append(cmds, tea.Quit)
-		// make sure to append and switch back to the main menu
-		// or reset back to form
-		m = initFormModel()
-	}
-	return m, tea.Batch(cmds...)
-}
-
-func (m formModel) View() tea.View { return tea.NewView(m.form.View()) }
-
-// validates if the user entered a number otherwise leave it be 
-func isNumber(s string) error {
-	s = strings.TrimSpace(s)
-	// empty
-	if s == "" {
-		return nil
-	}
-	if _, err := strconv.Atoi(s); err != nil {
-		return fmt.Errorf("must be a number")
-	}
-	return nil
-}
-
-func isEmpty(s string) error {
-	s = strings.TrimSpace(s)
-	if s == "" {
-		return nil
-	} 
-	return nil
-}*/
