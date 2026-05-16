@@ -17,10 +17,16 @@ func Dashboard() {
 	// layouts
 	header := tview.NewTextView().SetTitle(" Pobby Dashboard ").SetBorder(true).SetTitleAlign(tview.AlignCenter).SetBackgroundColor(tcell.NewRGBColor(30,33,36))
 	filter := FilterForm()
-	processes := ProcessTable()
+	processes := ProcessTable(dashboard)
 	information := tview.NewTextView().SetTitle(" Information ").SetBorder(true).SetTitleAlign(tview.AlignLeft).SetBackgroundColor(tcell.NewRGBColor(30,33,36))
-	help := tview.NewTextView().SetTitle(" Help ").SetBorder(true).SetTitleAlign(tview.AlignLeft).SetBackgroundColor(tcell.NewRGBColor(30,33,36))
-	other := tview.NewTextView().SetTitle(" Other ").SetBorder(true).SetTitleAlign(tview.AlignLeft).SetBackgroundColor(tcell.NewRGBColor(30,33,36)) // quick search? kill pid?
+	help := tview.NewTextView().SetText("Navigation - Up, Down, press Ctrl-C to exit")
+	help.SetTitle(" Help ").SetBorder(true).SetTitleAlign(tview.AlignCenter)
+	help.SetTextColor((tcell.NewRGBColor(153,170,181)))
+	help.SetTitleColor((tcell.NewRGBColor(153,170,181)))
+	help.SetBorderColor((tcell.NewRGBColor(153,170,181)))
+	help.SetBackgroundColor(tcell.NewRGBColor(30,33,36))
+	// other layout
+	other := DisplayOther() // quick search? kill pid?
 	// actual grid layout
 	grid := tview.NewGrid().
 	SetRows(3, 20, 0, 3).SetColumns(30, 30, 0, 30).
@@ -49,6 +55,8 @@ func Dashboard() {
 	}
 	return event
 	})
+
+	//go Refresh(dashboard)
 
 	// run the app
 	if err := dashboard.SetRoot(grid, true).SetFocus(grid).Run(); err != nil {

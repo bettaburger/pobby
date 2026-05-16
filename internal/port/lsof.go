@@ -22,7 +22,6 @@ var (
 	totalConnections uint16
 	//connections []gopsutil.ConnectionStat // stores all connections ; make sure to reset the list or make it dynamic
 	listening []gopsutil.ConnectionStat // stores listening connections
-	processes []ProcessStat // list of all process 
 )
 
 func GetTotalCon() uint16 { return totalConnections }
@@ -32,7 +31,9 @@ func StoreCon() []ProcessStat {
 	connections, err := gopsutil.Connections("inet")
 	if err != nil {
 		fmt.Printf("./internal/port/lsof.go - unable to list open connections: %v\n", err)
+		return nil
 	}
+	processes := make([]ProcessStat, 0, len(connections))
 	for _, con := range connections {
 		name := ""
 		// get process name from PID
@@ -94,7 +95,7 @@ func Addr(ip string, port uint32) string {
 	return fmt.Sprintf("%s:%d", ip, port)
 }
 
-// this function lists all open connections 
+// this function prints all open connections 
 func ListConnection() {
 	connections, err := gopsutil.Connections("inet")
 	if err != nil {
@@ -103,7 +104,7 @@ func ListConnection() {
 	PrintConnections(connections)
 }
 
-// this function lists all listening connections 
+// this function prints all listening connections 
 func ListListeningCon() {
 	connections, err := gopsutil.Connections("inet")
 	if err != nil {
