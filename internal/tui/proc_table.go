@@ -32,7 +32,7 @@ func (p *ProcessTableData) GetCell(row, column int) *tview.TableCell {
 		return tview.NewTableCell(p.TableHeaders[column]).SetSelectable(false).SetAttributes(tcell.AttrBold).SetBackgroundColor(tcell.NewRGBColor(35,39,42))
 	}
 	// process rows for column 0 ... 6 
-	process := p.Content[row-1]
+	process := p.Content[row-1] // content of a process at a specific row and column
 	var text string
 	switch column {
 	case 0:
@@ -51,28 +51,6 @@ func (p *ProcessTableData) GetCell(row, column int) *tview.TableCell {
 		text = process.State
 	}
 	return tview.NewTableCell(text)
-}
-
-// this function displays the 'process' primitive
-func ProcessTable(app *tview.Application) *tview.Table {
-	// form the connection 
-	processes := port.StoreCon()
-	// table
-	table := tview.NewTable()
-	table.SetBorder(true).SetTitleAlign(tview.AlignCenter).SetBackgroundColor(tcell.NewRGBColor(30, 33, 36))
-	table.SetTitle(" Processes ")
-	tableHeaders := []string{"pid", "port", "proto", "process name", "local address", "foreign address", "state"}
-	data := &ProcessTableData{
-		TableHeaders: tableHeaders,
-		Content: processes,
-		Length: len(processes),
-	}
-	table.SetContent(data)
-	table.SetFixed(1, 0)
-	table.SetSelectable(true, false)
-	// call refresh
-	go Refresh(app, table, data)
-	return table
 }
 
 // this function displays the 'other' primitive 
@@ -129,5 +107,27 @@ func Refresh(app *tview.Application, table *tview.Table, data *ProcessTableData)
 				//table.SetTitle(fmt.Sprintf(" Processes %s ", currentTime))
 		}
 	}		
+}
+
+// this function displays the 'process' primitive
+func ProcessTable(app *tview.Application) *tview.Table {
+	// form the connection 
+	processes := port.StoreCon()
+	// table
+	table := tview.NewTable()
+	table.SetBorder(true).SetTitleAlign(tview.AlignCenter).SetBackgroundColor(tcell.NewRGBColor(30, 33, 36))
+	table.SetFixed(1, 0) 
+	table.SetTitle(" Processes ")
+	tableHeaders := []string{"pid", "port", "proto", "process name", "local address", "foreign address", "state"}
+	data := &ProcessTableData{
+		TableHeaders: tableHeaders,
+		Content: processes,
+		Length: len(processes),
+	}
+	table.SetContent(data)
+	table.SetSelectable(true, false)
+	// call refresh
+	go Refresh(app, table, data)
+	return table
 }
 
