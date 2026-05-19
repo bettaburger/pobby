@@ -53,14 +53,6 @@ func (p *ProcessTableData) GetCell(row, column int) *tview.TableCell {
 	return tview.NewTableCell(text)
 }
 
-// this function displays the 'other' primitive 
-func DisplayOther() *tview.TextView {
-	other := tview.NewTextView().SetText(fmt.Sprintf("Total PID: %v", port.GetTotalCon()))
-	other.SetTitle(" Other ").SetBorder(true).SetTitleAlign(tview.AlignLeft)
-	other.SetBackgroundColor(tcell.NewRGBColor(30,33,36))
-	return other
-}
-
 // this function updates the table if there is a new row added, if a row exists keep it 
 func UpdateTable(app *tview.Application, table *tview.Table, data *ProcessTableData) {
 	app.QueueUpdateDraw(func() {
@@ -130,4 +122,9 @@ func ProcessTable(app *tview.Application) *tview.Table {
 	go Refresh(app, table, data)
 	return table
 }
+
+
+//////// filtering the output ////// 
+// functionality, when the user clicks filter, scroll the table to the selection on the table setselectable(true)
+// display the information whenever the table selection is true. 
 

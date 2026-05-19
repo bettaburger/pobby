@@ -7,15 +7,28 @@ import (
 
 // this function describes filterform primitive
 func FilterForm() *tview.Form {
-	form := tview.NewForm().
-	AddInputField("pid number", "", 40, tview.InputFieldInteger, nil).
-	AddInputField("port number", "", 40, tview.InputFieldInteger, nil).
-	AddDropDown("proto", []string{"any","tcp", "udp", "icmp", "ip", "udplite", "icmpmsg"}, 0, nil). // available for gopsutil ip,icmp,icmpmsg,tcp,udp,udplite
-	AddInputField("local address", "", 40, nil, nil).
-	AddInputField("foreign address", "", 40, nil, nil).
-	AddDropDown("state", []string{"listening", "established"}, 0, nil).
-	AddButton("Filter", nil).
-	AddButton("Clear", nil)
+	form := tview.NewForm()
+	pidField := tview.NewInputField().SetLabel("pid number").SetFieldWidth(40).SetAcceptanceFunc(tview.InputFieldInteger)
+	portField := tview.NewInputField().SetLabel("port number").SetFieldWidth(40).SetAcceptanceFunc(tview.InputFieldInteger)
+	protoDrop := tview.NewDropDown().SetLabel("proto").SetOptions([]string{"any", "tcp", "udp", "icmp", "ip", "udplite", "icmpmsg"}, nil)
+	localField := tview.NewInputField().SetLabel("local address").SetFieldWidth(40)
+	foreignField := tview.NewInputField().SetLabel("foreign address").SetFieldWidth(40)
+	stateDrop := tview.NewDropDown().SetLabel("state").SetOptions([]string{"all", "listening", "established"}, nil)
+	form.AddFormItem(pidField).AddFormItem(portField).AddFormItem(protoDrop).AddFormItem(localField).AddFormItem(foreignField).AddFormItem(stateDrop)
+
+	// filter button 
+	form.AddButton("Filter", nil)
+
+	// clear button
+	form.AddButton("Clear", func() {
+		pidField.SetText("")
+		portField.SetText("")
+		localField.SetText("")
+		foreignField.SetText("")
+		protoDrop.SetCurrentOption(0)
+		stateDrop.SetCurrentOption(0)
+	})
+
 	form.SetTitle(" Filter ").SetBorder(true).SetTitleAlign(tview.AlignLeft)
 	form.SetFieldBackgroundColor(tcell.NewRGBColor(35,39,42))
 	form.SetBackgroundColor(tcell.NewRGBColor(30,33,36)) 
@@ -60,3 +73,7 @@ func GetStateInput(form *tview.Form) (int, string) {
 	state := form.GetFormItemByLabel("state").(*tview.DropDown)
 	return state.GetCurrentOption()
 }
+
+/*func GetFilterState(form *tview.Form) {
+	filter := form.GetFormItemByLabel("filter").(tview.Button)
+}*/
