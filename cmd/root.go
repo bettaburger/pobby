@@ -1,4 +1,4 @@
-package command
+package cmd
 
 
 import (
@@ -11,8 +11,7 @@ import (
 // descriptor
 var rootCmd = &cobra.Command {
 	Use: "pobby",
-	Short: "Pobby is a CLI tool for ports.",
-	Long: "Simple CLI tool to display and manage listening ports in your terminal",
+	Short: "Pobby is a tui for managing ports",
 }
 
 func Execute() {
