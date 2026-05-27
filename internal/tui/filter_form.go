@@ -3,23 +3,50 @@ package tui
 import (
 	"github.com/rivo/tview"
 	"github.com/gdamore/tcell/v2" 
+	"fmt"
 )
 
+type ProcessFilter struct {
+	PID            string
+	Port           string
+	Proto          string
+	LocalAddress   string
+	ForeignAddress string
+	State          string
+}
+
 // this function describes filterform primitive
-func FilterForm() *tview.Form {
+func FilterForm(app *tview.Application, table *tview.Table, data *ProcessTableData) *tview.Form {
 	form := tview.NewForm()
-	pidField := tview.NewInputField().SetLabel("pid number").SetFieldWidth(40).SetAcceptanceFunc(tview.InputFieldInteger)
-	portField := tview.NewInputField().SetLabel("port number").SetFieldWidth(40).SetAcceptanceFunc(tview.InputFieldInteger)
+	pidField := tview.NewInputField().SetLabel("pid").SetFieldWidth(40).SetAcceptanceFunc(tview.InputFieldInteger)
+	portField := tview.NewInputField().SetLabel("port").SetFieldWidth(40).SetAcceptanceFunc(tview.InputFieldInteger)
 	protoDrop := tview.NewDropDown().SetLabel("proto").SetOptions([]string{"any", "tcp", "udp", "icmp", "ip", "udplite", "icmpmsg"}, nil)
 	localField := tview.NewInputField().SetLabel("local address").SetFieldWidth(40)
 	foreignField := tview.NewInputField().SetLabel("foreign address").SetFieldWidth(40)
 	stateDrop := tview.NewDropDown().SetLabel("state").SetOptions([]string{"all", "listening", "established"}, nil)
 	form.AddFormItem(pidField).AddFormItem(portField).AddFormItem(protoDrop).AddFormItem(localField).AddFormItem(foreignField).AddFormItem(stateDrop)
-
-	// filter button 
-	form.AddButton("Filter", nil)
-
-	// clear button
+	// this button filters the "query"
+	form.AddButton("Filter", func() {
+		data.mu.Lock()
+		_, proto := protoDrop.GetCurrentOption()
+		_, state := stateDrop.GetCurrentOption()
+		filter := ProcessFilter{
+			PID: pidField.GetText(),
+			Port: portField.GetText(),
+			Proto: proto,
+			LocalAddress: localField.GetText(),
+			ForeignAddress: foreignField.GetText(),
+			State: state,
+		}
+		row, ok := FilterLogic(data, filter)
+		data.mu.Unlock()
+		if ok {
+			table.Select(row, 0)
+		} else {
+			fmt.Printf(" unable to find row\n")
+		}
+	})
+	// this button clears the filter
 	form.AddButton("Clear", func() {
 		pidField.SetText("")
 		portField.SetText("")
@@ -28,7 +55,6 @@ func FilterForm() *tview.Form {
 		protoDrop.SetCurrentOption(0)
 		stateDrop.SetCurrentOption(0)
 	})
-
 	form.SetTitle(" Filter ").SetBorder(true).SetTitleAlign(tview.AlignLeft)
 	form.SetFieldBackgroundColor(tcell.NewRGBColor(35,39,42))
 	form.SetBackgroundColor(tcell.NewRGBColor(30,33,36)) 
@@ -43,13 +69,13 @@ func FilterForm() *tview.Form {
 }
 
 func GetPIDInput(form *tview.Form) string {
-	pid := form.GetFormItemByLabel("pid number").(*tview.InputField)
+	pid := form.GetFormItemByLabel("pid").(*tview.InputField)
 	return pid.GetText()
 }
 
 // returns the current selected option by its index and the port type name
 func GetPortInput(form *tview.Form) (int, string) {
-	port := form.GetFormItemByLabel("port number").(*tview.DropDown) // converts to tview state 
+	port := form.GetFormItemByLabel("port").(*tview.DropDown) // converts to tview state 
 	return port.GetCurrentOption()
 }
 

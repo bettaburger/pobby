@@ -16,9 +16,9 @@ func Dashboard() {
 	}*/
 	// layouts
 	header := tview.NewTextView().SetTitle(" Pobby Dashboard ").SetBorder(true).SetTitleAlign(tview.AlignCenter).SetBackgroundColor(tcell.NewRGBColor(30,33,36))
-	filter := FilterForm()
-	processes := ProcessTable(dashboard)
-	information := DisplayInfo()
+	processes, data := ProcessTable(dashboard)
+	filter := FilterForm(dashboard, processes, data)
+	information := DisplayOther() // have this for now 
 	help := tview.NewTextView().SetText("Navigation - Up, Down, press Ctrl-C to exit")
 	help.SetTitle(" Help ").SetBorder(true).SetTitleAlign(tview.AlignCenter)
 	help.SetTextColor((tcell.NewRGBColor(153,170,181)))

@@ -6,6 +6,8 @@ import (
 	"github.com/rivo/tview"
 	"fmt"
 	"time"
+	"strings"
+	"sync"
 )
 
 type ProcessTableData struct {
@@ -14,6 +16,9 @@ type ProcessTableData struct {
 	Content []port.ProcessStat
 	Length int
 	RowMap map[int32]int
+	Filter ProcessFilter
+
+	mu sync.Mutex
 }
 
 // return the row of the table
@@ -28,8 +33,14 @@ func (p *ProcessTableData) GetColumnCount() int {
 
 // returns the cell display
 func (p *ProcessTableData) GetCell(row, column int) *tview.TableCell {
+	if row < 0 || column < 0 {
+		return tview.NewTableCell("")
+	}
 	if row == 0 {
 		return tview.NewTableCell(p.TableHeaders[column]).SetSelectable(false).SetAttributes(tcell.AttrBold).SetBackgroundColor(tcell.NewRGBColor(35,39,42))
+	}
+	if row-1 >= len(p.Content) || column >= len(p.TableHeaders) {
+		return tview.NewTableCell("")
 	}
 	// process rows for column 0 ... 6 
 	process := p.Content[row-1] // content of a process at a specific row and column
@@ -56,6 +67,8 @@ func (p *ProcessTableData) GetCell(row, column int) *tview.TableCell {
 // this function updates the table if there is a new row added, if a row exists keep it 
 func UpdateTable(app *tview.Application, table *tview.Table, data *ProcessTableData) {
 	app.QueueUpdateDraw(func() {
+		data.mu.Lock()
+		defer data.mu.Unlock()
 		newMap := make(map[int32]int)
 		row := 1 // start at row 1 
 		for _, p := range data.Content {
@@ -93,7 +106,9 @@ func Refresh(app *tview.Application, table *tview.Table, data *ProcessTableData)
 	for {
 		select {
 		case <-tick.C:
+			data.mu.Lock()
 			data.Content = port.StoreCon()
+			data.mu.Unlock()
 			UpdateTable(app, table, data)
 			//currentTime := time.Now().Format("15:04:05") // debugging the queueupdatedraw
 				//table.SetTitle(fmt.Sprintf(" Processes %s ", currentTime))
@@ -102,7 +117,7 @@ func Refresh(app *tview.Application, table *tview.Table, data *ProcessTableData)
 }
 
 // this function displays the 'process' primitive
-func ProcessTable(app *tview.Application) *tview.Table {
+func ProcessTable(app *tview.Application) (*tview.Table, *ProcessTableData) {
 	// form the connection 
 	processes := port.StoreCon()
 	// table
@@ -117,14 +132,41 @@ func ProcessTable(app *tview.Application) *tview.Table {
 		Length: len(processes),
 	}
 	table.SetContent(data)
-	table.SetSelectable(true, false)
+	table.SetSelectable(true, false) // rows selectable only
 	// call refresh
 	go Refresh(app, table, data)
-	return table
+	return table, data
 }
 
 
 //////// filtering the output ////// 
 // functionality, when the user clicks filter, scroll the table to the selection on the table setselectable(true)
 // display the information whenever the table selection is true. 
+func FilterLogic(p *ProcessTableData, filter ProcessFilter,) (int, bool) {
+	possibleRow := false // possible row found 
+	for i, proc := range p.Content {
+		if filter.PID != "" && fmt.Sprintf("%d", proc.PID) == filter.PID {
+			possibleRow = true
+		}
+		if filter.Port != "" && fmt.Sprintf("%d", proc.Port) == filter.Port {
+			possibleRow = true
+		}
+		if filter.Proto != "" && filter.Proto != "any" && strings.EqualFold(proc.Proto, filter.Proto) {
+			possibleRow = true 
+		}
+		if filter.LocalAddress != "" && strings.Contains(strings.ToLower(proc.LocalAddress.IP), strings.ToLower(filter.LocalAddress)) {
+			possibleRow = true
+		}
+		if filter.ForeignAddress != "" && strings.Contains(strings.ToLower(proc.ForeignAddress.IP), strings.ToLower(filter.ForeignAddress)) {
+			possibleRow = true
+		}
+		if filter.State != "" && filter.State != "all" && strings.EqualFold(proc.State, filter.State) {
+			possibleRow = true
+		}
+		if possibleRow {
+			return i + 1, true // +1 because row 0 = header
+		}
+	}// otherwise return false
+	return 0, possibleRow
+}
 
